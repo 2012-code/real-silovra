@@ -5,7 +5,7 @@ import { Link as LinkType, LinkGroup } from '@/types'
 import { Reorder, useDragControls, motion, AnimatePresence } from 'framer-motion'
 import { GripVertical, Trash2, Plus, ExternalLink, Eye, EyeOff, BarChart3, Palette, Pin, PinOff, Calendar, Tag, Image, Loader2, FolderOpen, ShoppingBag, Play, Link as LinkIcon, DollarSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { canAddLink, type PlanType } from '@/lib/stripe'
+import { canAddLink, type PlanType } from '@/lib/plans'
 
 interface LinkEditorProps {
     links: LinkType[]

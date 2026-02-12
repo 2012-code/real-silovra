@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Crown, ArrowRight, Loader2, ExternalLink } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { isPro } from '@/lib/stripe'
+import { isPro } from '@/lib/plans'
 
 interface UpgradePromptProps {
     plan?: string
@@ -15,17 +15,8 @@ export default function UpgradePrompt({ plan }: UpgradePromptProps) {
     const router = useRouter()
     const userIsPro = isPro(plan)
 
-    const handleUpgrade = async () => {
-        setLoading(true)
-        try {
-            const res = await fetch('/api/stripe/checkout', { method: 'POST' })
-            const data = await res.json()
-            if (data.url) window.location.href = data.url
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setLoading(false)
-        }
+    const handleUpgrade = () => {
+        router.push('/pricing')
     }
 
     const handleManage = async () => {

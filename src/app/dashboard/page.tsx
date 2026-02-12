@@ -151,6 +151,17 @@ export default function Dashboard() {
                 ))}
                 <div className="w-px h-4 bg-white/10 mx-2" />
                 {user && <NotificationBell userId={user.id} />}
+
+                {profile?.plan !== 'pro' && (
+                    <button
+                        onClick={() => router.push('/pricing')}
+                        className="hidden sm:flex items-center gap-2 px-4 py-1.5 bg-zenith-indigo/10 hover:bg-zenith-indigo/20 border border-zenith-indigo/20 rounded-full transition-all group"
+                    >
+                        <Crown size={12} className="text-zenith-indigo group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-black text-zenith-indigo uppercase tracking-widest">Upgrade</span>
+                    </button>
+                )}
+
                 <button
                     onClick={handleSignOut}
                     className="p-2.5 text-white/40 hover:text-red-400 transition-colors"

@@ -15,7 +15,7 @@ export interface Profile {
     custom_font?: string
     enable_email_collection?: boolean
     plan?: 'free' | 'pro'
-    stripe_customer_id?: string
+    stripe_customer_id?: string // Used for PayPal order ID or Stripe customer ID
 }
 
 export interface SocialLink {
