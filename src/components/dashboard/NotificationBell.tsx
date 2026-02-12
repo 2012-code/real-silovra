@@ -80,10 +80,10 @@ export default function NotificationBell({ userId }: NotificationBellProps) {
             <AnimatePresence>
                 {showDropdown && (
                     <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                        className="absolute right-0 top-full mt-2 w-80 bg-black/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-50"
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute right-0 bottom-full mb-2 w-80 bg-black/90 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-[100]"
                     >
                         <div className="px-5 py-4 border-b border-white/[0.05] flex items-center justify-between">
                             <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Notifications</span>

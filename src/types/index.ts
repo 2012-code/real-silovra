@@ -14,6 +14,8 @@ export interface Profile {
     seo_settings?: SEOSettings | null
     custom_font?: string
     enable_email_collection?: boolean
+    plan?: 'free' | 'pro'
+    stripe_customer_id?: string
 }
 
 export interface SocialLink {

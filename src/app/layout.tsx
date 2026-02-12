@@ -5,7 +5,6 @@ import SupabaseProvider from '@/components/providers/supabase-provider'
 import BackgroundProvider from '@/components/providers/BackgroundProvider'
 import LayoutTransition from '@/components/LayoutTransition'
 import SonicAmbience from '@/components/SonicAmbience'
-import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -37,7 +36,6 @@ export default function RootLayout({
               {children}
             </LayoutTransition>
             <SonicAmbience />
-            <PWAInstallPrompt />
           </BackgroundProvider>
         </SupabaseProvider>
       </body>

@@ -5,11 +5,13 @@ import { Link as LinkType, LinkGroup } from '@/types'
 import { Reorder, useDragControls, motion, AnimatePresence } from 'framer-motion'
 import { GripVertical, Trash2, Plus, ExternalLink, Eye, EyeOff, BarChart3, Palette, Pin, PinOff, Calendar, Tag, Image, Loader2, FolderOpen, ShoppingBag, Play, Link as LinkIcon, DollarSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { canAddLink, type PlanType } from '@/lib/stripe'
 
 interface LinkEditorProps {
     links: LinkType[]
     onUpdate: (links: LinkType[]) => void
     userId: string
+    plan?: string
 }
 
 const CATEGORIES = ['Music', 'Social', 'Shop', 'Content', 'Business', 'Personal', 'Other']
@@ -19,7 +21,7 @@ const LINK_TYPES = [
     { id: 'embed', label: 'Embed', icon: Play },
 ] as const
 
-export default function LinkEditor({ links, onUpdate, userId }: LinkEditorProps) {
+export default function LinkEditor({ links, onUpdate, userId, plan = 'free' }: LinkEditorProps) {
     const [loading, setLoading] = useState(false)
     const [groups, setGroups] = useState<LinkGroup[]>([])
     const [newGroupName, setNewGroupName] = useState('')
@@ -39,6 +41,11 @@ export default function LinkEditor({ links, onUpdate, userId }: LinkEditorProps)
     }, [userId, supabase])
 
     const addLink = async () => {
+        if (!canAddLink(plan as PlanType, links.length)) {
+            alert('Free plan is limited to 5 links. Upgrade to Pro for unlimited links!')
+            window.location.href = '/pricing'
+            return
+        }
         setLoading(true)
         const newLink = {
             user_id: userId,

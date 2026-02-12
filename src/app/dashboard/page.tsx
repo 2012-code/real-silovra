@@ -11,10 +11,11 @@ import Insights from '@/components/dashboard/Insights'
 import NotificationBell from '@/components/dashboard/NotificationBell'
 import SubscribersList from '@/components/dashboard/SubscribersList'
 import UTMBuilder from '@/components/dashboard/UTMBuilder'
+import UpgradePrompt from '@/components/dashboard/UpgradePrompt'
 import { Link as LinkType, Profile } from '@/types'
 import { checkMilestones } from '@/lib/notifications'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LogOut, ExternalLink, LayoutGrid, Link as LinkIcon, BarChart3, Settings, User, ShoppingBag, Palette, Share2, Eye } from 'lucide-react'
+import { LogOut, ExternalLink, LayoutGrid, Link as LinkIcon, BarChart3, Settings, User, ShoppingBag, Palette, Share2, Eye, Crown } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
@@ -166,7 +167,15 @@ export default function Dashboard() {
                         <div className="space-y-2 text-center sm:text-left">
                             <h1 className="text-4xl font-black tracking-tighter text-white uppercase flex items-center gap-4">
                                 Silovra
-                                <span className="text-[10px] bg-white/[0.05] border border-white/10 px-3 py-1 rounded-full text-white/40 font-bold tracking-[0.3em]">v1.0.0-BETA</span>
+                                <span className={cn(
+                                    "text-[9px] px-3 py-1 rounded-full font-black tracking-[0.3em] border flex items-center gap-1.5",
+                                    profile?.plan === 'pro'
+                                        ? 'bg-zenith-indigo/10 border-zenith-indigo/20 text-zenith-indigo'
+                                        : 'bg-white/[0.03] border-white/10 text-white/30'
+                                )}>
+                                    <Crown size={10} />
+                                    {profile?.plan === 'pro' ? 'PRO' : 'FREE'}
+                                </span>
                             </h1>
                             <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.5em]">Central Command & Visual Identity</p>
                         </div>
@@ -203,7 +212,7 @@ export default function Dashboard() {
                                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 items-start">
                                     <div className="xl:col-span-8 space-y-10">
                                         {activeTab === 'links' && (
-                                            <LinkEditor links={links} onUpdate={setLinks} userId={user.id} />
+                                            <LinkEditor links={links} onUpdate={setLinks} userId={user.id} plan={profile?.plan} />
                                         )}
                                         {activeTab === 'profile' && (
                                             <ProfileEditor profile={profile} onUpdate={setProfile} userId={user.id} hideDesign />
@@ -245,6 +254,7 @@ export default function Dashboard() {
                                                 onUpdate={(updated) => setProfile(updated)}
                                             />
                                             {user && <SubscribersList userId={user.id} />}
+                                            <UpgradePrompt plan={profile?.plan} />
                                         </div>
                                     )}
                                 </>
