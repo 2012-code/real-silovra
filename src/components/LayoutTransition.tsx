@@ -13,7 +13,7 @@ export default function LayoutTransition({ children }: { children: React.ReactNo
                 initial="initial"
                 animate="in"
                 exit="out"
-                variants={pageVariants}
+                variants={pageVariants as any}
                 className="min-h-screen"
             >
                 {children}

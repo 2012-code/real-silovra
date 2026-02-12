@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
+import { useSupabase } from '@/components/providers/supabase-provider'
 import type { Link } from '@/types'
 
 export function useLinks(userId: string | undefined) {
     const [links, setLinks] = useState<Link[]>([])
     const [loading, setLoading] = useState(true)
-    const supabase = createClient()
+    const { supabase } = useSupabase()
 
     useEffect(() => {
         async function fetchLinks() {

@@ -4,6 +4,8 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { ArrowRight, Mail, Lock, Loader2 } from 'lucide-react'
+import GoogleSignInButton from '@/components/GoogleSignInButton'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -33,70 +35,173 @@ export default function Login() {
     }
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-zinc-900">
+        <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+            {/* Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a1a] via-[#1a1035] to-[#0d1b2a]" />
+
+            {/* Animated Orbs */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md space-y-8"
+                animate={{
+                    scale: [1, 1.2, 1],
+                    x: [0, 30, 0],
+                    y: [0, -20, 0],
+                }}
+                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute top-[10%] left-[15%] w-[400px] h-[400px] rounded-full bg-indigo-600/20 blur-[120px]"
+            />
+            <motion.div
+                animate={{
+                    scale: [1.2, 1, 1.2],
+                    x: [0, -40, 0],
+                    y: [0, 30, 0],
+                }}
+                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute bottom-[10%] right-[10%] w-[350px] h-[350px] rounded-full bg-violet-500/15 blur-[120px]"
+            />
+            <motion.div
+                animate={{
+                    scale: [1, 1.3, 1],
+                    y: [0, 15, 0],
+                }}
+                transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute top-[40%] right-[30%] w-[200px] h-[200px] rounded-full bg-blue-500/10 blur-[80px]"
+            />
+
+            {/* Subtle Grid Pattern */}
+            <div
+                className="absolute inset-0 opacity-[0.03]"
+                style={{
+                    backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+                    backgroundSize: '64px 64px',
+                }}
+            />
+
+            {/* Card */}
+            <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}
+                className="relative z-10 w-full max-w-[440px] mx-4"
             >
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-                        Sign in to UltraLinks
-                    </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                        Or{' '}
-                        <Link href="/auth/signup" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-                            create a new account
-                        </Link>
-                    </p>
-                </div>
-                <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-                    <div className="-space-y-px rounded-md shadow-sm">
-                        <div>
-                            <input
-                                id="email-address"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                required
-                                className="relative block w-full rounded-t-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
-                                placeholder="Email address"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
-                        <div>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="current-password"
-                                required
-                                className="relative block w-full rounded-b-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-3"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
+                {/* Glow behind card */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-blue-500/20 rounded-[2.5rem] blur-xl opacity-60" />
+
+                <div className="relative bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] rounded-[2.5rem] p-10 shadow-[0_30px_100px_rgba(0,0,0,0.4)]">
+                    {/* Logo / Brand */}
+                    <div className="text-center mb-10">
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.2, duration: 0.5 }}
+                            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 mb-6 shadow-[0_0_40px_rgba(99,102,241,0.3)]"
+                        >
+                            <img src="/silovra-logo.png" alt="Silovra" className="w-8 h-8 brightness-200" />
+                        </motion.div>
+                        <h1 className="text-2xl font-black text-white tracking-tight mb-2">
+                            Welcome back
+                        </h1>
+                        <p className="text-sm text-white/40 font-medium">
+                            Sign in to your Silovra account
+                        </p>
                     </div>
 
-                    {error && (
-                        <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded border border-red-200">
-                            {error}
+                    {/* Form */}
+                    <form onSubmit={handleLogin} className="space-y-5">
+                        {/* Email Field */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] pl-1">Email</label>
+                            <div className="relative group">
+                                <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
+                                <input
+                                    id="email-address"
+                                    name="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    required
+                                    className="w-full pl-12 pr-4 py-4 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm font-medium placeholder:text-white/15 outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all"
+                                    placeholder="you@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
                         </div>
-                    )}
 
-                    <div>
-                        <button
+                        {/* Password Field */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] pl-1">Password</label>
+                            <div className="relative group">
+                                <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    autoComplete="current-password"
+                                    required
+                                    className="w-full pl-12 pr-4 py-4 bg-white/[0.04] border border-white/[0.08] rounded-2xl text-white text-sm font-medium placeholder:text-white/15 outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Error */}
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-sm text-center py-3 px-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400"
+                            >
+                                {error}
+                            </motion.div>
+                        )}
+
+                        {/* Submit Button */}
+                        <motion.button
                             type="submit"
                             disabled={loading}
-                            className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 transition-all"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full py-4 bg-gradient-to-r from-indigo-500 to-violet-600 text-white text-sm font-bold uppercase tracking-[0.15em] rounded-2xl shadow-[0_10px_40px_rgba(99,102,241,0.3)] hover:shadow-[0_15px_50px_rgba(99,102,241,0.4)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            {loading ? 'Signing in...' : 'Sign in'}
-                        </button>
+                            {loading ? (
+                                <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                                <>
+                                    Sign in
+                                    <ArrowRight size={16} />
+                                </>
+                            )}
+                        </motion.button>
+
+                        <div className="relative flex items-center py-2">
+                            <div className="flex-grow border-t border-white/10"></div>
+                            <span className="flex-shrink-0 mx-4 text-xs font-bold text-white/20 uppercase tracking-widest">Or continue with</span>
+                            <div className="flex-grow border-t border-white/10"></div>
+                        </div>
+
+                        <GoogleSignInButton />
+                    </form>
+
+                    {/* Footer Link */}
+                    <div className="mt-8 text-center">
+                        <p className="text-sm text-white/30">
+                            Don&apos;t have an account?{' '}
+                            <Link
+                                href="/auth/signup"
+                                className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
+                            >
+                                Create one
+                            </Link>
+                        </p>
                     </div>
-                </form>
+                </div>
             </motion.div>
+
+            {/* Bottom Branding */}
+            <div className="absolute bottom-6 text-center">
+                <p className="text-[10px] text-white/15 font-bold uppercase tracking-[0.4em]">Silovra</p>
+            </div>
         </div>
     )
 }

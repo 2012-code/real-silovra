@@ -1,50 +1,61 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 248, 250, 252;
-  --background-end-rgb: 255, 255, 255;
+@theme {
+  --color-zenith-space: #050510;
+  --color-zenith-indigo: #818cf8;
+  --color-zenith-violet: #a855f7;
+  --color-zenith-plum: #701a75;
+  --color-zenith-white: #ffffff;
+  --color-zenith-glass: rgba(255, 255, 255, 0.04);
+  --color-zenith-border: rgba(255, 255, 255, 0.1);
+  --color-zenith-glow: rgba(99, 102, 241, 0.25);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+:root {
+  --background: #050510;
+  --foreground: #ffffff;
+  --card-zenith: rgba(15, 15, 25, 0.4);
+  --blur-zenith: 60px;
+  --shadow-zenith: 0 40px 80px -15px rgba(0, 0, 0, 0.8);
+  --glow-zenith: 0 0 50px -10px rgba(129, 140, 248, 0.2);
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-  font-family: 'Inter', sans-serif;
-  overflow-x: hidden;
+  background-color: var(--background);
+  background-image:
+    radial-gradient(circle at 5% 10%, rgba(129, 140, 248, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 95% 90%, rgba(112, 26, 117, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.05) 0%, transparent 80%);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.02em;
+}
+
+/* Ensure inputs carry their own contrast */
+input,
+textarea,
+select {
+  color: inherit;
+  background-color: transparent;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #334155;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
