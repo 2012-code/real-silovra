@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, Mail, Lock, User, Loader2, Sparkles } from 'lucide-react'
 import GoogleSignInButton from '@/components/GoogleSignInButton'
+import { getBaseUrl } from '@/lib/auth-utils'
 
 export default function Signup() {
     const [email, setEmail] = useState('')
@@ -21,11 +22,12 @@ export default function Signup() {
         setLoading(true)
         setError(null)
 
+        const baseUrl = getBaseUrl()
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email,
             password,
             options: {
-                emailRedirectTo: `${location.origin}/auth/callback`,
+                emailRedirectTo: `${baseUrl}/auth/callback`,
                 data: {
                     username: username,
                 }

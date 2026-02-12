@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { getBaseUrl } from '@/lib/auth-utils'
 
 export default function GoogleSignInButton() {
     const supabase = createClient()
@@ -11,10 +12,11 @@ export default function GoogleSignInButton() {
         setLoading(true)
         setError(null)
         try {
+            const baseUrl = getBaseUrl()
             const { error: authError } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+                    redirectTo: `${baseUrl}/auth/callback?next=/dashboard`,
                 },
             })
 
