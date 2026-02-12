@@ -387,7 +387,7 @@ export default function Insights({ links, profile }: InsightsProps) {
 
 function AnalyticsLock({ label }: { label: string }) {
     return (
-        <div className="absolute inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
             <div className="bg-black/80 backdrop-blur-xl border border-white/10 p-8 rounded-[2.5rem] text-center space-y-4 max-w-sm mx-4 shadow-2xl">
                 <div className="w-12 h-12 bg-zenith-indigo/20 rounded-2xl flex items-center justify-center mx-auto text-zenith-indigo">
                     <Lock size={24} />

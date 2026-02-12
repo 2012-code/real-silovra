@@ -121,7 +121,7 @@ export default function Dashboard() {
             <div className="fixed top-0 right-1/4 w-px h-screen bg-gradient-to-b from-transparent via-zenith-violet/10 to-transparent pointer-events-none" />
 
             {/* 1. Floating Hub (Nav) */}
-            <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 p-2 px-3 bg-black/40 backdrop-blur-[60px] border border-white/[0.08] rounded-full z-50 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all hover:scale-[1.02]">
+            <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 p-2 px-3 bg-black/40 backdrop-blur-[60px] border border-white/[0.08] rounded-full z-[999] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all hover:scale-[1.02]">
                 <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mr-2">
                     <Image src="/silovra-logo.png" alt="S" width={20} height={20} className="brightness-125" />
                 </div>
