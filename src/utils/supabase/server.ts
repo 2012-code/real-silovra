@@ -2,11 +2,30 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 export async function createClient() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    // During static page generation, env vars may not be available.
+    // Return a minimal client that won't crash the build.
+    if (!supabaseUrl || !supabaseKey) {
+        return createServerClient(
+            'https://placeholder.supabase.co',
+            'placeholder-key',
+            {
+                cookies: {
+                    get() { return undefined },
+                    set() { },
+                    remove() { },
+                },
+            }
+        )
+    }
+
     const cookieStore = await cookies()
 
     return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        supabaseUrl,
+        supabaseKey,
         {
             cookies: {
                 get(name: string) {
