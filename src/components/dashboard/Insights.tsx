@@ -1,10 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { Link as LinkType, Profile, LinkClickEvent } from '@/types'
-import { BarChart3, MousePointer2, Eye, TrendingUp, Link as LinkIcon, Monitor, Smartphone, Globe, ArrowRight, Calendar } from 'lucide-react'
+import { BarChart3, MousePointer2, Eye, TrendingUp, Link as LinkIcon, Monitor, Smartphone, Globe, ArrowRight, Calendar, Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/utils/supabase/client'
+import { isPro } from '@/lib/plans'
 
 interface InsightsProps {
     links: LinkType[]
@@ -17,7 +18,9 @@ export default function Insights({ links, profile }: InsightsProps) {
     const [clickEvents, setClickEvents] = useState<LinkClickEvent[]>([])
     const [timeRange, setTimeRange] = useState<TimeRange>('7d')
     const [loading, setLoading] = useState(true)
+
     const supabase = createClient()
+    const isProUser = isPro(profile?.plan)
 
     const totalClicks = links.reduce((acc, link) => acc + (link.click_count || 0), 0)
     const totalViews = profile?.total_views || 0
@@ -144,162 +147,175 @@ export default function Insights({ links, profile }: InsightsProps) {
             </div>
 
             {/* 2. Time-Series Chart */}
-            <div className="bg-black/40 backdrop-blur-[60px] rounded-[3.5rem] border border-white/[0.08] shadow-2xl relative overflow-hidden">
-                <div className="px-12 py-10 border-b border-white/[0.05] flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-6">
-                        <div className="p-3 bg-zenith-indigo/10 rounded-2xl text-zenith-indigo">
-                            <Calendar size={16} />
+            <div className="relative">
+                {!isProUser && <AnalyticsLock label="Time-Series Analysis" />}
+                <div className={cn(
+                    "bg-black/40 backdrop-blur-[60px] rounded-[3.5rem] border border-white/[0.08] shadow-2xl relative overflow-hidden",
+                    !isProUser && "opacity-20 pointer-events-none filter blur-sm select-none"
+                )}>
+                    <div className="px-12 py-10 border-b border-white/[0.05] flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-6">
+                            <div className="p-3 bg-zenith-indigo/10 rounded-2xl text-zenith-indigo">
+                                <Calendar size={16} />
+                            </div>
+                            <div className="space-y-1">
+                                <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">Click Timeline</h3>
+                                <p className="text-lg font-black text-white tracking-tight">Clicks Over Time</p>
+                            </div>
                         </div>
-                        <div className="space-y-1">
-                            <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em]">Click Timeline</h3>
-                            <p className="text-lg font-black text-white tracking-tight">Clicks Over Time</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        {(['7d', '30d'] as TimeRange[]).map(range => (
-                            <button
-                                key={range}
-                                onClick={() => setTimeRange(range)}
-                                className={cn(
-                                    "px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all",
-                                    timeRange === range
-                                        ? "bg-white text-black"
-                                        : "bg-white/[0.03] text-white/40 hover:text-white border border-white/10"
-                                )}
-                            >
-                                {range === '7d' ? '7 Days' : '30 Days'}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-                <div className="p-12">
-                    {loading ? (
-                        <div className="flex items-center justify-center py-20">
-                            <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-zenith-indigo" />
-                        </div>
-                    ) : (
-                        <div className="flex items-end gap-1.5 h-48">
-                            {dailyClicks.map((day, idx) => (
-                                <div key={idx} className="flex-1 flex flex-col items-center gap-2 group/bar">
-                                    <span className="text-[9px] font-black text-white/0 group-hover/bar:text-white/60 transition-colors tabular-nums">
-                                        {day.count}
-                                    </span>
-                                    <motion.div
-                                        initial={{ height: 0 }}
-                                        animate={{ height: `${(day.count / maxDailyClicks) * 100}%` }}
-                                        transition={{ delay: idx * 0.03, duration: 0.8, ease: "circOut" }}
-                                        className="w-full min-h-[4px] bg-zenith-indigo/60 hover:bg-zenith-indigo rounded-t-lg transition-colors cursor-pointer"
-                                        title={`${day.label}: ${day.count} clicks`}
-                                    />
-                                    {(daysCount <= 7 || idx % Math.ceil(daysCount / 7) === 0) && (
-                                        <span className="text-[7px] font-bold text-white/20 whitespace-nowrap">
-                                            {day.label}
-                                        </span>
+                        <div className="flex gap-2">
+                            {(['7d', '30d'] as TimeRange[]).map(range => (
+                                <button
+                                    key={range}
+                                    onClick={() => setTimeRange(range)}
+                                    className={cn(
+                                        "px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all",
+                                        timeRange === range
+                                            ? "bg-white text-black"
+                                            : "bg-white/[0.03] text-white/40 hover:text-white border border-white/10"
                                     )}
-                                </div>
+                                >
+                                    {range === '7d' ? '7 Days' : '30 Days'}
+                                </button>
                             ))}
                         </div>
-                    )}
+                    </div>
+                    <div className="p-12">
+                        {loading ? (
+                            <div className="flex items-center justify-center py-20">
+                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-zenith-indigo" />
+                            </div>
+                        ) : (
+                            <div className="flex items-end gap-1.5 h-48">
+                                {dailyClicks.map((day, idx) => (
+                                    <div key={idx} className="flex-1 flex flex-col items-center gap-2 group/bar">
+                                        <span className="text-[9px] font-black text-white/0 group-hover/bar:text-white/60 transition-colors tabular-nums">
+                                            {day.count}
+                                        </span>
+                                        <motion.div
+                                            initial={{ height: 0 }}
+                                            animate={{ height: `${(day.count / maxDailyClicks) * 100}%` }}
+                                            transition={{ delay: idx * 0.03, duration: 0.8, ease: "circOut" }}
+                                            className="w-full min-h-[4px] bg-zenith-indigo/60 hover:bg-zenith-indigo rounded-t-lg transition-colors cursor-pointer"
+                                            title={`${day.label}: ${day.count} clicks`}
+                                        />
+                                        {(daysCount <= 7 || idx % Math.ceil(daysCount / 7) === 0) && (
+                                            <span className="text-[7px] font-bold text-white/20 whitespace-nowrap">
+                                                {day.label}
+                                            </span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
+
             {/* 3. Breakdown Grid: Referrers + Devices + Browsers */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                {/* Referrer Sources */}
-                <div className="bg-black/40 backdrop-blur-[60px] rounded-[3.5rem] border border-white/[0.08] p-10 shadow-2xl">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="p-3 bg-zenith-indigo/10 rounded-2xl text-zenith-indigo">
-                            <Globe size={16} />
-                        </div>
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Traffic Sources</span>
-                    </div>
-                    <div className="space-y-5">
-                        {referrerData.length === 0 ? (
-                            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] text-center py-8">No data yet</p>
-                        ) : referrerData.map(([source, count]) => (
-                            <div key={source} className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-white/70 truncate">{source}</span>
-                                    <span className="text-xs font-black text-white/50 tabular-nums">{count}</span>
-                                </div>
-                                <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${(count / maxReferrer) * 100}%` }}
-                                        transition={{ duration: 1, ease: "circOut" }}
-                                        className="h-full bg-zenith-indigo/70 rounded-full"
-                                    />
-                                </div>
+            <div className="relative">
+                {!isProUser && <AnalyticsLock label="Audience Demographics" />}
+                <div className={cn(
+                    "grid grid-cols-1 lg:grid-cols-3 gap-10",
+                    !isProUser && "opacity-20 pointer-events-none filter blur-sm select-none"
+                )}>
+                    {/* Referrer Sources */}
+                    <div className="bg-black/40 backdrop-blur-[60px] rounded-[3.5rem] border border-white/[0.08] p-10 shadow-2xl">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="p-3 bg-zenith-indigo/10 rounded-2xl text-zenith-indigo">
+                                <Globe size={16} />
                             </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Device Types */}
-                <div className="bg-black/40 backdrop-blur-[60px] rounded-[3.5rem] border border-white/[0.08] p-10 shadow-2xl">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="p-3 bg-zenith-indigo/10 rounded-2xl text-zenith-indigo">
-                            <Monitor size={16} />
+                            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Traffic Sources</span>
                         </div>
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Devices</span>
-                    </div>
-                    <div className="space-y-6">
-                        {Object.entries(deviceMap).map(([device, count]) => {
-                            const DeviceIcon = DEVICE_ICONS[device] || Monitor
-                            const pct = ((count / totalDeviceClicks) * 100).toFixed(0)
-                            return (
-                                <div key={device} className="flex items-center gap-5">
-                                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${DEVICE_COLORS[device]}15` }}>
-                                        <DeviceIcon size={18} style={{ color: DEVICE_COLORS[device] }} />
+                        <div className="space-y-5">
+                            {referrerData.length === 0 ? (
+                                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] text-center py-8">No data yet</p>
+                            ) : referrerData.map(([source, count]) => (
+                                <div key={source} className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-bold text-white/70 truncate">{source}</span>
+                                        <span className="text-xs font-black text-white/50 tabular-nums">{count}</span>
                                     </div>
-                                    <div className="flex-1 space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs font-bold text-white/70 capitalize">{device}</span>
-                                            <span className="text-xs font-black text-white/50">{pct}%</span>
-                                        </div>
-                                        <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                                            <motion.div
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${pct}%` }}
-                                                transition={{ duration: 1, ease: "circOut" }}
-                                                className="h-full rounded-full"
-                                                style={{ backgroundColor: DEVICE_COLORS[device] }}
-                                            />
-                                        </div>
+                                    <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${(count / maxReferrer) * 100}%` }}
+                                            transition={{ duration: 1, ease: "circOut" }}
+                                            className="h-full bg-zenith-indigo/70 rounded-full"
+                                        />
                                     </div>
                                 </div>
-                            )
-                        })}
-                    </div>
-                </div>
-
-                {/* Browsers */}
-                <div className="bg-black/40 backdrop-blur-[60px] rounded-[3.5rem] border border-white/[0.08] p-10 shadow-2xl">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="p-3 bg-zenith-indigo/10 rounded-2xl text-zenith-indigo">
-                            <Globe size={16} />
+                            ))}
                         </div>
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Browsers</span>
                     </div>
-                    <div className="space-y-5">
-                        {browserData.length === 0 ? (
-                            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] text-center py-8">No data yet</p>
-                        ) : browserData.map(([browser, count]) => (
-                            <div key={browser} className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs font-bold text-white/70">{browser}</span>
-                                    <span className="text-xs font-black text-white/50 tabular-nums">{count}</span>
-                                </div>
-                                <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${(count / maxBrowser) * 100}%` }}
-                                        transition={{ duration: 1, ease: "circOut" }}
-                                        className="h-full bg-zenith-violet/70 rounded-full"
-                                    />
-                                </div>
+
+                    {/* Device Types */}
+                    <div className="bg-black/40 backdrop-blur-[60px] rounded-[3.5rem] border border-white/[0.08] p-10 shadow-2xl">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="p-3 bg-zenith-indigo/10 rounded-2xl text-zenith-indigo">
+                                <Monitor size={16} />
                             </div>
-                        ))}
+                            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Devices</span>
+                        </div>
+                        <div className="space-y-6">
+                            {Object.entries(deviceMap).map(([device, count]) => {
+                                const DeviceIcon = DEVICE_ICONS[device] || Monitor
+                                const pct = ((count / totalDeviceClicks) * 100).toFixed(0)
+                                return (
+                                    <div key={device} className="flex items-center gap-5">
+                                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${DEVICE_COLORS[device]}15` }}>
+                                            <DeviceIcon size={18} style={{ color: DEVICE_COLORS[device] }} />
+                                        </div>
+                                        <div className="flex-1 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-bold text-white/70 capitalize">{device}</span>
+                                                <span className="text-xs font-black text-white/50">{pct}%</span>
+                                            </div>
+                                            <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${pct}%` }}
+                                                    transition={{ duration: 1, ease: "circOut" }}
+                                                    className="h-full rounded-full"
+                                                    style={{ backgroundColor: DEVICE_COLORS[device] }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Browsers */}
+                    <div className="bg-black/40 backdrop-blur-[60px] rounded-[3.5rem] border border-white/[0.08] p-10 shadow-2xl">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="p-3 bg-zenith-indigo/10 rounded-2xl text-zenith-indigo">
+                                <Globe size={16} />
+                            </div>
+                            <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em]">Browsers</span>
+                        </div>
+                        <div className="space-y-5">
+                            {browserData.length === 0 ? (
+                                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] text-center py-8">No data yet</p>
+                            ) : browserData.map(([browser, count]) => (
+                                <div key={browser} className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-bold text-white/70">{browser}</span>
+                                        <span className="text-xs font-black text-white/50 tabular-nums">{count}</span>
+                                    </div>
+                                    <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${(count / maxBrowser) * 100}%` }}
+                                            transition={{ duration: 1, ease: "circOut" }}
+                                            className="h-full bg-zenith-violet/70 rounded-full"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -364,6 +380,28 @@ export default function Insights({ links, profile }: InsightsProps) {
                         </div>
                     )}
                 </div>
+            </div>
+        </div >
+    )
+}
+
+function AnalyticsLock({ label }: { label: string }) {
+    return (
+        <div className="absolute inset-0 z-50 flex items-center justify-center">
+            <div className="bg-black/80 backdrop-blur-xl border border-white/10 p-8 rounded-[2.5rem] text-center space-y-4 max-w-sm mx-4 shadow-2xl">
+                <div className="w-12 h-12 bg-zenith-indigo/20 rounded-2xl flex items-center justify-center mx-auto text-zenith-indigo">
+                    <Lock size={24} />
+                </div>
+                <div className="space-y-2">
+                    <h3 className="text-white font-black uppercase tracking-widest text-sm">Pro Feature</h3>
+                    <p className="text-white/60 text-xs font-medium">Upgrade to Pro to unlock {label} and gain deeper insights.</p>
+                </div>
+                <button
+                    onClick={() => window.location.href = '/pricing'}
+                    className="px-6 py-3 bg-white text-black rounded-full text-[10px] font-black uppercase tracking-[0.2em] hover:scale-105 transition-transform"
+                >
+                    Upgrade to Pro
+                </button>
             </div>
         </div>
     )

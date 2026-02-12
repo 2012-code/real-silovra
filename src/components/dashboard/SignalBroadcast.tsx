@@ -17,6 +17,11 @@ export default function SignalBroadcast({ profile }: SignalBroadcastProps) {
     const [qrBgColor, setQrBgColor] = useState('#ffffff')
     const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/${profile.username}`
 
+    // Holo Mode Overrides
+    const effectiveFg = isHoloMode ? '#ffffff' : qrFgColor
+    const effectiveBg = isHoloMode ? '#000000' : qrBgColor
+    const qrValue = isHoloMode ? `${publicUrl}?view=ar` : publicUrl
+
     const downloadQR = () => {
         const svg = qrRef.current?.querySelector('svg')
         if (!svg) return
@@ -185,12 +190,16 @@ export default function SignalBroadcast({ profile }: SignalBroadcastProps) {
                     {isHoloMode && (
                         <>
                             {/* AR Scan Overlay */}
-                            <div className="absolute inset-0 z-20 pointer-events-none border-[20px] border-zenith-indigo/10 rounded-[3.5rem]" />
+                            <div className="absolute inset-0 z-20 pointer-events-none border-[4px] border-zenith-indigo/50 rounded-[3.5rem] shadow-[0_0_30px_rgba(99,102,241,0.5)_inset]" />
                             <motion.div
-                                animate={{ top: ['0%', '100%', '0%'] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-                                className="absolute left-0 right-0 h-[2px] bg-zenith-indigo/50 blur-[2px] z-30"
+                                animate={{ top: ['0%', '100%', '0%'], opacity: [0, 1, 0] }}
+                                transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                                className="absolute left-0 right-0 h-[4px] bg-gradient-to-r from-transparent via-zenith-indigo to-transparent blur-[2px] z-30"
                             />
+                            <div className="absolute inset-0 z-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
+
+                            {/* Projector Base */}
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-40 h-10 bg-zenith-indigo/20 blur-[30px] rounded-full z-0" />
                         </>
                     )}
 
@@ -203,26 +212,21 @@ export default function SignalBroadcast({ profile }: SignalBroadcastProps) {
                         ref={qrRef}
                         className={cn(
                             "p-8 rounded-[3rem] shadow-[0_0_100px_rgba(255,255,255,0.1)] transition-all duration-700 relative z-10",
-                            isHoloMode ? "scale-110 rotate-z-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)]" : "group-hover:scale-105"
+                            isHoloMode ? "scale-110 rotate-z-2 shadow-[0_20px_50px_rgba(99,102,241,0.3)] ring-4 ring-zenith-indigo/20" : "group-hover:scale-105"
                         )}
                         style={{
                             transform: isHoloMode ? 'translateZ(50px)' : 'none',
-                            background: qrBgColor
+                            background: effectiveBg
                         }}
                     >
                         <QRCodeSVG
-                            value={publicUrl}
+                            value={qrValue}
                             size={280}
                             level="H"
                             includeMargin={false}
-                            fgColor={qrFgColor}
-                            bgColor={qrBgColor}
-                            imageSettings={profile.avatar_url ? {
-                                src: profile.avatar_url,
-                                height: 60,
-                                width: 60,
-                                excavate: true,
-                            } : undefined}
+                            fgColor={effectiveFg}
+                            bgColor={effectiveBg}
+
                         />
                     </div>
 

@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils'
 import { Metadata, ResolvingMetadata } from 'next'
 import { THEME_PRESETS } from '@/lib/themes'
 
-export const revalidate = 60
+export const revalidate = 5
 
 interface Props {
     params: Promise<{ username: string }>
@@ -57,9 +57,13 @@ export async function generateMetadata(
     }
 }
 
-export default async function PublicProfile({ params }: Props) {
+import HoloProfile from '@/components/public/HoloProfile'
+
+export default async function PublicProfile(props: { params: Promise<{ username: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+    const searchParams = await props.searchParams
+    const { username } = await props.params
     const supabase = await createClient()
-    const { username } = await params
+
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -204,6 +208,20 @@ export default async function PublicProfile({ params }: Props) {
             ))}
         </div>
     )
+
+    // Check for AR/Holo Mode
+    const isArMode = searchParams?.view === 'ar'
+
+    if (isArMode) {
+        return (
+            <HoloProfile
+                profile={profile}
+                links={allLinks || []}
+                groups={groups || []}
+                activeLinks={activeLinks}
+            />
+        )
+    }
 
     return (
         <main

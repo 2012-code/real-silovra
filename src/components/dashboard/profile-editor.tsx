@@ -101,6 +101,7 @@ export default function ProfileEditor({ profile, onUpdate, userId, hideIdentity 
                 layout_mode: profile.layout_mode,
                 seo_settings: profile.seo_settings,
                 custom_font: profile.custom_font,
+                avatar_url: profile.avatar_url,
                 banner_url: profile.banner_url,
                 enable_email_collection: profile.enable_email_collection,
             })

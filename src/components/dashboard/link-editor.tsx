@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { Link as LinkType, LinkGroup } from '@/types'
 import { Reorder, useDragControls, motion, AnimatePresence } from 'framer-motion'
-import { GripVertical, Trash2, Plus, ExternalLink, Eye, EyeOff, BarChart3, Palette, Pin, PinOff, Calendar, Tag, Image, Loader2, FolderOpen, ShoppingBag, Play, Link as LinkIcon, DollarSign } from 'lucide-react'
+import { GripVertical, Trash2, Plus, ExternalLink, Eye, EyeOff, BarChart3, Palette, Pin, PinOff, Calendar, Tag, Image, Loader2, FolderOpen, ShoppingBag, Play, Link as LinkIcon, DollarSign, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { canAddLink, type PlanType } from '@/lib/plans'
 
@@ -16,9 +16,9 @@ interface LinkEditorProps {
 
 const CATEGORIES = ['Music', 'Social', 'Shop', 'Content', 'Business', 'Personal', 'Other']
 const LINK_TYPES = [
-    { id: 'link', label: 'Link', icon: LinkIcon },
-    { id: 'product', label: 'Product', icon: ShoppingBag },
-    { id: 'embed', label: 'Embed', icon: Play },
+    { id: 'link', label: 'Link', icon: LinkIcon, requiredPlan: 'free' },
+    { id: 'product', label: 'Product', icon: ShoppingBag, requiredPlan: 'pro' },
+    { id: 'embed', label: 'Embed', icon: Play, requiredPlan: 'pro' },
 ] as const
 
 export default function LinkEditor({ links, onUpdate, userId, plan = 'free' }: LinkEditorProps) {
@@ -40,21 +40,30 @@ export default function LinkEditor({ links, onUpdate, userId, plan = 'free' }: L
         fetchGroups()
     }, [userId, supabase])
 
-    const addLink = async () => {
-        if (!canAddLink(plan as PlanType, links.length)) {
+    const addLink = async (type: 'link' | 'product' | 'embed' = 'link') => {
+        // 1. Check Link Count Limit
+        if (type === 'link' && !canAddLink(plan, links.length)) {
             alert('Free plan is limited to 5 links. Upgrade to Pro for unlimited links!')
             window.location.href = '/pricing'
             return
         }
+
+        // 2. Check Feature Access
+        if (type !== 'link' && plan !== 'pro') {
+            alert(`The ${type} feature is available on the Pro plan. Upgrade to unlock!`)
+            window.location.href = '/pricing'
+            return
+        }
+
         setLoading(true)
         const newLink = {
             user_id: userId,
-            title: 'NEW ASSET',
-            url: 'https://',
+            title: type === 'product' ? 'NEW PRODUCT' : type === 'embed' ? 'NEW MEDIA' : 'NEW ASSET',
+            url: type === 'embed' ? '' : 'https://',
             position: links.length,
             is_visible: true,
             is_pinned: false,
-            link_type: 'link',
+            link_type: type,
         }
 
         const { data, error } = await supabase
@@ -134,14 +143,21 @@ export default function LinkEditor({ links, onUpdate, userId, plan = 'free' }: L
                 </div>
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => setShowGroupManager(!showGroupManager)}
+                        onClick={() => {
+                            if (plan !== 'pro') {
+                                alert('Link Groups are a Pro feature. Upgrade to organize your links!')
+                                window.location.href = '/pricing'
+                                return
+                            }
+                            setShowGroupManager(!showGroupManager)
+                        }}
                         className="flex items-center gap-3 px-6 py-4 bg-white/[0.03] border border-white/10 text-white/60 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white/[0.06] transition-all"
                     >
-                        <FolderOpen size={14} />
+                        {plan !== 'pro' ? <Lock size={14} className="text-white/40" /> : <FolderOpen size={14} />}
                         Groups
                     </button>
                     <button
-                        onClick={addLink}
+                        onClick={() => addLink('link')}
                         disabled={loading}
                         className="group flex items-center gap-4 px-10 py-5 bg-white text-black rounded-full font-black text-[11px] uppercase tracking-[0.3em] hover:bg-zenith-indigo hover:text-white transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] active:scale-95 disabled:opacity-50"
                     >
@@ -208,6 +224,7 @@ export default function LinkEditor({ links, onUpdate, userId, plan = 'free' }: L
                             onDelete={deleteLink}
                             userId={userId}
                             groups={groups}
+                            plan={plan}
                         />
                     ))}
                 </AnimatePresence>
@@ -222,7 +239,7 @@ export default function LinkEditor({ links, onUpdate, userId, plan = 'free' }: L
     )
 }
 
-function LinkItem({ link, index, onUpdate, onDelete, userId, groups }: { link: LinkType, index: number, onUpdate: Function, onDelete: Function, userId: string, groups: LinkGroup[] }) {
+function LinkItem({ link, index, onUpdate, onDelete, userId, groups, plan }: { link: LinkType, index: number, onUpdate: Function, onDelete: Function, userId: string, groups: LinkGroup[], plan: string }) {
     const controls = useDragControls()
     const [showAdvanced, setShowAdvanced] = useState(false)
     const [uploading, setUploading] = useState(false)
@@ -303,21 +320,31 @@ function LinkItem({ link, index, onUpdate, onDelete, userId, groups }: { link: L
                 <div className="flex-1 p-10 pl-6 space-y-6">
                     {/* Link Type Selector */}
                     <div className="flex items-center gap-2">
-                        {LINK_TYPES.map(type => (
-                            <button
-                                key={type.id}
-                                onClick={() => onUpdate(link.id, { link_type: type.id })}
-                                className={cn(
-                                    "flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all",
-                                    linkType === type.id
-                                        ? "bg-zenith-indigo/20 text-zenith-indigo border border-zenith-indigo/30"
-                                        : "text-white/20 hover:text-white/50 border border-transparent hover:border-white/10"
-                                )}
-                            >
-                                <type.icon size={10} />
-                                {type.label}
-                            </button>
-                        ))}
+                        {LINK_TYPES.map(type => {
+                            const isLocked = type.requiredPlan === 'pro' && plan !== 'pro'
+                            return (
+                                <button
+                                    key={type.id}
+                                    onClick={() => {
+                                        if (isLocked) {
+                                            alert(`The ${type.label} feature is available on the Pro plan.`)
+                                            window.location.href = '/pricing'
+                                            return
+                                        }
+                                        onUpdate(link.id, { link_type: type.id })
+                                    }}
+                                    className={cn(
+                                        "flex items-center gap-2 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all",
+                                        linkType === type.id
+                                            ? "bg-zenith-indigo/20 text-zenith-indigo border border-zenith-indigo/30"
+                                            : "text-white/20 hover:text-white/50 border border-transparent hover:border-white/10"
+                                    )}
+                                >
+                                    {isLocked ? <Lock size={10} /> : <type.icon size={10} />}
+                                    {type.label}
+                                </button>
+                            )
+                        })}
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
