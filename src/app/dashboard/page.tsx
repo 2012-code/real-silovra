@@ -196,7 +196,7 @@ export default function Dashboard() {
                                 <div className="hidden md:flex flex-col items-end gap-1">
                                     <span className="text-[9px] text-zinc-600 font-black uppercase tracking-widest">Global Link Matrix</span>
                                     <div className="flex items-center gap-2 text-white/60 hover:text-white transition-colors cursor-pointer group">
-                                        <span className="text-xs font-black tracking-tighter">silovra.link/{profile.username}</span>
+                                        <span className="text-xs font-black tracking-tighter">silovra.online/{profile.username}</span>
                                         <ExternalLink size={12} className="text-zinc-800 group-hover:text-zenith-indigo transition-colors" />
                                     </div>
                                 </div>
@@ -255,7 +255,7 @@ export default function Dashboard() {
                                     {activeTab === 'broadcast' && profile && (
                                         <div className="space-y-16">
                                             <SignalBroadcast profile={profile} />
-                                            <UTMBuilder profileUrl={`https://silovra.link/${profile.username}`} />
+                                            <UTMBuilder profileUrl={`https://silovra.online/${profile.username}`} />
                                         </div>
                                     )}
                                     {activeTab === 'settings' && profile && (

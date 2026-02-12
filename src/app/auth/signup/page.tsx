@@ -163,7 +163,7 @@ export default function Signup() {
                                 />
                                 {username && (
                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-white/20 tracking-wide">
-                                        silovra.link/{username}
+                                        silovra.online/{username}
                                     </span>
                                 )}
                             </div>
