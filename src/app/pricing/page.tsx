@@ -138,7 +138,6 @@ export default function PricingPage() {
                                     <a
                                         className="gumroad-button w-full py-4 bg-zenith-indigo text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-zenith-indigo/80 transition-all flex items-center justify-center gap-2 shadow-lg shadow-zenith-indigo/20 cursor-pointer text-center block"
                                         href={gumroadLink}
-                                        target="_blank"
                                         data-gumroad-single-product="true"
                                         data-gumroad-overlay-checkout="true"
                                     >
