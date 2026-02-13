@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSupabase } from '@/components/providers/supabase-provider'
 import LinkEditor from '@/components/dashboard/link-editor'
@@ -195,13 +196,20 @@ export default function Dashboard() {
                             {profile?.username && (
                                 <div className="hidden md:flex flex-col items-end gap-1">
                                     <span className="text-[9px] text-zinc-600 font-black uppercase tracking-widest">Global Link Matrix</span>
-                                    <div className="flex items-center gap-2 text-white/60 hover:text-white transition-colors cursor-pointer group">
+                                    <Link
+                                        href={`/${profile.username}`}
+                                        target="_blank"
+                                        className="flex items-center gap-2 text-white/60 hover:text-white transition-colors cursor-pointer group"
+                                    >
                                         <span className="text-xs font-black tracking-tighter">silovra.online/{profile.username}</span>
                                         <ExternalLink size={12} className="text-zinc-800 group-hover:text-zenith-indigo transition-colors" />
-                                    </div>
+                                    </Link>
                                 </div>
                             )}
-                            <button className="flex items-center gap-3 px-8 py-3.5 bg-white text-black text-[11px] font-black uppercase tracking-[0.2em] rounded-full h-fit shadow-2xl shadow-zenith-indigo/10 active:scale-95 transition-all">
+                            <button
+                                onClick={() => setActiveTab('broadcast')}
+                                className="flex items-center gap-3 px-8 py-3.5 bg-white text-black text-[11px] font-black uppercase tracking-[0.2em] rounded-full h-fit shadow-2xl shadow-zenith-indigo/10 active:scale-95 transition-all"
+                            >
                                 <Share2 size={16} />
                                 Broadcast
                             </button>
