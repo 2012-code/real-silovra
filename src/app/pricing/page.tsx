@@ -29,7 +29,7 @@ export default function PricingPage() {
 
     return (
         <>
-            <Script src="https://gumroad.com/js/gumroad.js" strategy="lazyOnload" />
+            <Script src="https://gumroad.com/js/gumroad.js" />
             <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-6 py-24">
                 <div className="max-w-4xl w-full space-y-16">
                     {/* Header */}
@@ -140,6 +140,7 @@ export default function PricingPage() {
                                         href={gumroadLink}
                                         target="_blank"
                                         data-gumroad-single-product="true"
+                                        data-gumroad-overlay-checkout="true"
                                     >
                                         Upgrade to Pro
                                         <ArrowRight size={14} />
