@@ -1,39 +1,35 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Check, Zap, Crown, ArrowRight, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PLANS } from '@/lib/plans'
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js"
+import { createClient } from '@/utils/supabase/client'
+import Script from 'next/script'
 
 export default function PricingPage() {
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [userId, setUserId] = useState<string | null>(null)
     const router = useRouter()
+    const supabase = createClient()
 
-    const handlePayPalApprove = async (data: any, actions: any) => {
-        setLoading(true)
-        try {
-            const order = await actions.order.capture()
-            // Call our API to upgrade the user
-            const res = await fetch('/api/paypal/capture', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderID: order.id })
-            })
-
-            if (res.ok) {
-                router.push('/dashboard?upgraded=true')
+    useEffect(() => {
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                setUserId(user.id)
             }
-        } catch (err) {
-            console.error('PayPal error:', err)
-        } finally {
             setLoading(false)
         }
-    }
+        getUser()
+    }, [supabase])
+
+    const gumroadLink = `https://silovra.gumroad.com/l/silovra-pro${userId ? `?user_id=${userId}` : ''}`
 
     return (
-        <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test" }}>
+        <>
+            <Script src="https://gumroad.com/js/gumroad.js" strategy="lazyOnload" />
             <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-6 py-24">
                 <div className="max-w-4xl w-full space-y-16">
                     {/* Header */}
@@ -132,21 +128,23 @@ export default function PricingPage() {
                                 ))}
                             </div>
 
-                            {/* PayPal Button */}
+                            {/* Gumroad Button */}
                             <div className="z-10 relative">
-                                <PayPalButtons
-                                    style={{ layout: "horizontal", label: "subscribe", height: 45, tagline: false }}
-                                    createOrder={(data, actions) => {
-                                        return actions.order.create({
-                                            intent: "CAPTURE",
-                                            purchase_units: [{
-                                                description: "Silovra Pro Subscription",
-                                                amount: { currency_code: "USD", value: "9.00" }
-                                            }]
-                                        })
-                                    }}
-                                    onApprove={handlePayPalApprove}
-                                />
+                                {loading ? (
+                                    <div className="w-full py-4 bg-zenith-indigo/50 rounded-2xl flex items-center justify-center">
+                                        <Loader2 size={16} className="animate-spin text-white" />
+                                    </div>
+                                ) : (
+                                    <a
+                                        className="gumroad-button w-full py-4 bg-zenith-indigo text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-zenith-indigo/80 transition-all flex items-center justify-center gap-2 shadow-lg shadow-zenith-indigo/20 cursor-pointer text-center block"
+                                        href={gumroadLink}
+                                        target="_blank"
+                                        data-gumroad-single-product="true"
+                                    >
+                                        Upgrade to Pro
+                                        <ArrowRight size={14} />
+                                    </a>
+                                )}
                             </div>
                         </motion.div>
                     </div>
@@ -158,10 +156,10 @@ export default function PricingPage() {
                         transition={{ delay: 0.4 }}
                         className="text-center text-[10px] text-white/20 font-bold"
                     >
-                        Cancel anytime · Secure payments via PayPal · No long-term contracts
+                        Cancel anytime · Secure payments via Gumroad · No long-term contracts
                     </motion.p>
                 </div>
             </div>
-        </PayPalScriptProvider>
+        </>
     )
 }

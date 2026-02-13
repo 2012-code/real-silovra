@@ -27,6 +27,9 @@ export async function createClient() {
         supabaseUrl,
         supabaseKey,
         {
+            cookieOptions: {
+                maxAge: 31536000,
+            },
             cookies: {
                 get(name: string) {
                     return cookieStore.get(name)?.value
