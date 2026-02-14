@@ -6,7 +6,7 @@ import { Check, Zap, Crown, ArrowRight, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PLANS } from '@/lib/plans'
 import { createClient } from '@/utils/supabase/client'
-import Script from 'next/script'
+
 
 export default function PricingPage() {
     const [loading, setLoading] = useState(true)
@@ -25,11 +25,10 @@ export default function PricingPage() {
         getUser()
     }, [supabase])
 
-    const gumroadLink = `https://silovra.gumroad.com/l/silovra-pro${userId ? `?user_id=${userId}` : ''}`
+
 
     return (
         <>
-            <Script src="https://gumroad.com/js/gumroad.js" />
             <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-6 py-24">
                 <div className="max-w-4xl w-full space-y-16">
                     {/* Header */}
@@ -128,22 +127,40 @@ export default function PricingPage() {
                                 ))}
                             </div>
 
-                            {/* Gumroad Button */}
+                            {/* Crypto Button */}
                             <div className="z-10 relative">
                                 {loading ? (
                                     <div className="w-full py-4 bg-zenith-indigo/50 rounded-2xl flex items-center justify-center">
                                         <Loader2 size={16} className="animate-spin text-white" />
                                     </div>
                                 ) : (
-                                    <a
-                                        className="gumroad-button w-full py-4 bg-zenith-indigo text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-zenith-indigo/80 transition-all flex items-center justify-center gap-2 shadow-lg shadow-zenith-indigo/20 cursor-pointer text-center block"
-                                        href={gumroadLink}
-                                        data-gumroad-single-product="true"
-                                        data-gumroad-overlay-checkout="true"
+                                    <button
+                                        onClick={async () => {
+                                            setLoading(true)
+                                            try {
+                                                const res = await fetch('/api/nowpayments/subscribe', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ email: '' })
+                                                })
+                                                const data = await res.json()
+                                                if (data.invoice_url) {
+                                                    window.location.href = data.invoice_url
+                                                } else {
+                                                    alert('Failed to create subscription: ' + (data.error || 'Unknown error'))
+                                                }
+                                            } catch (err) {
+                                                console.error(err)
+                                                alert('Something went wrong')
+                                            } finally {
+                                                setLoading(false)
+                                            }
+                                        }}
+                                        className="w-full py-4 bg-zenith-indigo text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-zenith-indigo/80 transition-all flex items-center justify-center gap-2 shadow-lg shadow-zenith-indigo/20 cursor-pointer text-center block"
                                     >
-                                        Upgrade to Pro
+                                        Pay with Crypto
                                         <ArrowRight size={14} />
-                                    </a>
+                                    </button>
                                 )}
                             </div>
                         </motion.div>
@@ -156,7 +173,7 @@ export default function PricingPage() {
                         transition={{ delay: 0.4 }}
                         className="text-center text-[10px] text-white/20 font-bold"
                     >
-                        Cancel anytime · Secure payments via Gumroad · No long-term contracts
+                        Cancel anytime · Secure payments via NOWPayments · No long-term contracts
                     </motion.p>
                 </div>
             </div>

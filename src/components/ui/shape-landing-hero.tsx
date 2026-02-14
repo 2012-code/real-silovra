@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { Circle } from "lucide-react";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 
@@ -156,7 +156,7 @@ function HeroGeometric({
                         animate="visible"
                         className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] mb-8 md:mb-12"
                     >
-                        <Circle className="h-2 w-2 fill-rose-500/80 text-rose-500/80" />
+                        <Image src="/silovra-logo.png" alt="Silovra Logo" width={20} height={20} className="w-5 h-5 object-contain" />
                         <span className="text-sm text-gray-300 tracking-wide">
                             {badge}
                         </span>

@@ -11,6 +11,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Silovra',
   description: 'Your Digital Identity, Simplified.',
+  icons: {
+    icon: '/silovra-logo.png',
+  },
 }
 
 const GOOGLE_FONTS_URL = 'https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Grotesk:wght@400;700&family=DM+Sans:wght@400;700;900&family=Quicksand:wght@400;700&family=Poppins:wght@400;700;900&family=Montserrat:wght@400;700;900&family=Raleway:wght@400;700;900&family=Playfair+Display:wght@400;700;900&family=Lora:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Fira+Code:wght@400;700&family=IBM+Plex+Sans:wght@400;700&family=Nunito:wght@400;700;900&family=Work+Sans:wght@400;700;900&family=Rubik:wght@400;700;900&family=Sora:wght@400;700;800&family=Archivo:wght@400;700;900&display=swap'

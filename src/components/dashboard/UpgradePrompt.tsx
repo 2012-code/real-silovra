@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Crown, ArrowRight, Loader2, ExternalLink } from 'lucide-react'
+import { Crown, ArrowRight, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { isPro } from '@/lib/plans'
 
@@ -11,7 +11,6 @@ interface UpgradePromptProps {
 
 export default function UpgradePrompt({ plan }: UpgradePromptProps) {
     const [loading, setLoading] = useState(false)
-    const [portalLoading, setPortalLoading] = useState(false)
     const router = useRouter()
     const userIsPro = isPro(plan)
 
@@ -19,18 +18,7 @@ export default function UpgradePrompt({ plan }: UpgradePromptProps) {
         router.push('/pricing')
     }
 
-    const handleManage = async () => {
-        setPortalLoading(true)
-        try {
-            const res = await fetch('/api/stripe/portal', { method: 'POST' })
-            const data = await res.json()
-            if (data.url) window.location.href = data.url
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setPortalLoading(false)
-        }
-    }
+
 
     if (userIsPro) {
         return (
@@ -45,17 +33,9 @@ export default function UpgradePrompt({ plan }: UpgradePromptProps) {
                     </div>
                     <div>
                         <p className="text-sm font-black text-white">Pro Plan Active</p>
-                        <p className="text-[10px] text-white/40 font-bold">All features unlocked · $9/month</p>
+                        <p className="text-[10px] text-white/40 font-bold">All features unlocked</p>
                     </div>
                 </div>
-                <button
-                    onClick={handleManage}
-                    disabled={portalLoading}
-                    className="px-6 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-[9px] font-black text-white/50 uppercase tracking-widest hover:bg-white/[0.06] transition-all flex items-center gap-2"
-                >
-                    {portalLoading ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />}
-                    Manage Subscription
-                </button>
             </motion.div>
         )
     }
