@@ -52,10 +52,10 @@ export async function POST(req: NextRequest) {
         }
 
         const data = await response.json()
-        return NextResponse.json({ ...data, debug_v: '2026-02-15-0115' })
+        return NextResponse.json(data)
 
     } catch (err: any) {
         console.error('Subscription creation error:', err)
-        return NextResponse.json({ error: err.message, debug_v: '2026-02-15-0115' }, { status: 500 })
+        return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }
