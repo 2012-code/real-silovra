@@ -138,7 +138,7 @@ export default function PricingPage() {
                                         onClick={async () => {
                                             setLoading(true)
                                             try {
-                                                const res = await fetch('/api/nowpayments/subscribe', {
+                                                const res = await fetch('/api/nowpayments/invoice', {
                                                     method: 'POST',
                                                     headers: { 'Content-Type': 'application/json' },
                                                     body: JSON.stringify({ email: '' })
@@ -147,18 +147,18 @@ export default function PricingPage() {
                                                 if (data.invoice_url) {
                                                     window.location.href = data.invoice_url
                                                 } else {
-                                                    alert('Failed to create subscription: ' + (data.error || 'Unknown error'))
+                                                    alert('Payment Error (V2): ' + (data.error || 'Unknown error'))
                                                 }
                                             } catch (err) {
                                                 console.error(err)
-                                                alert('Something went wrong')
+                                                alert('Connection error (V2)')
                                             } finally {
                                                 setLoading(false)
                                             }
                                         }}
                                         className="w-full py-4 bg-zenith-indigo text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-zenith-indigo/80 transition-all flex items-center justify-center gap-2 shadow-lg shadow-zenith-indigo/20 cursor-pointer text-center block"
                                     >
-                                        Pay with Crypto
+                                        Pay with Crypto (Secure)
                                         <ArrowRight size={14} />
                                     </button>
                                 )}
