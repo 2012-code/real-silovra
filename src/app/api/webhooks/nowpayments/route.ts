@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import crypto from 'crypto'
 
-const IPN_SECRET = process.env.NOWPAYMENTS_IPN_SECRET
-
-if (!IPN_SECRET) {
-    throw new Error('NOWPAYMENTS_IPN_SECRET is not defined')
-}
-
 export async function POST(req: NextRequest) {
     try {
+        const IPN_SECRET = process.env.NOWPAYMENTS_IPN_SECRET
+        if (!IPN_SECRET) {
+            console.error('NOWPAYMENTS_IPN_SECRET is not defined')
+            return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+        }
+
         const sig = req.headers.get('x-nowpayments-sig')
         if (!sig) {
             return NextResponse.json({ error: 'No signature' }, { status: 400 })

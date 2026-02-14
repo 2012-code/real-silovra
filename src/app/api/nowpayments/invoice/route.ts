@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 
 // Use Environment Variables
-const API_KEY = process.env.NOWPAYMENTS_API_KEY
-// const API_URL = 'https://api-sandbox.nowpayments.io/v1' // Sandbox
 const API_URL = 'https://api.nowpayments.io/v1' // Production
 
 export async function POST(req: NextRequest) {
     try {
+        const API_KEY = process.env.NOWPAYMENTS_API_KEY
+        if (!API_KEY) {
+            console.error('NOWPAYMENTS_API_KEY is missing')
+            return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+        }
+
         const supabase = await createClient()
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
