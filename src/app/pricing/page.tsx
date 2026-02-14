@@ -156,9 +156,9 @@ export default function PricingPage() {
                                                 setLoading(false)
                                             }
                                         }}
-                                        className="w-full py-4 bg-zenith-indigo text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-zenith-indigo/80 transition-all flex items-center justify-center gap-2 shadow-lg shadow-zenith-indigo/20 cursor-pointer text-center block"
+                                        className="w-full py-4 bg-green-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-green-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 cursor-pointer text-center block"
                                     >
-                                        Pay with Crypto (Secure)
+                                        !!! Pay with Crypto (Secure V3) !!!
                                         <ArrowRight size={14} />
                                     </button>
                                 )}
