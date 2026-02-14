@@ -40,14 +40,15 @@ function request(method, path, body) {
 }
 
 async function run() {
-    // 1. Get Plan
-    await request('GET', '/subscriptions/plans/783991728');
+    // 1. Get Plan (verified working)
+    // await request('GET', '/subscriptions/plans/783991728');
 
-    // 2. Try to create subscription again (to see raw error)
-    await request('POST', '/subscriptions', {
-        subscription_plan_id: '783991728',
-        email: 'test@example.com',
-        order_id: 'test_user_123'
+    // 2. Try to create invoice
+    await request('POST', '/invoice', {
+        price_amount: 9,
+        price_currency: 'usd',
+        order_id: 'test_user_123',
+        order_description: 'Test Invoice'
     });
 }
 
