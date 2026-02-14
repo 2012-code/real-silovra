@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         }
 
         const data = await response.json()
-        return NextResponse.json(data)
+        return NextResponse.json({ ...data, debug_v: '2026-02-15-0115' })
 
     } catch (err: any) {
         console.error('Subscription creation error:', err)
