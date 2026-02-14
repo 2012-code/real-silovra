@@ -12,9 +12,8 @@ export const metadata: Metadata = {
   title: 'Silovra',
   description: 'Your Digital Identity, Simplified.',
   icons: {
-    icon: '/silovra-logo.png',
-    shortcut: '/silovra-logo.png',
-    apple: '/silovra-logo.png',
+    icon: '/icon.png',
+    apple: '/icon.png',
   },
 }
 
