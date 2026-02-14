@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import crypto from 'crypto'
 
-const IPN_SECRET = '8LMsDLB5Pm07KEge4IDsaTbnaI6cKfWv'
+const IPN_SECRET = process.env.NOWPAYMENTS_IPN_SECRET
+
+if (!IPN_SECRET) {
+    throw new Error('NOWPAYMENTS_IPN_SECRET is not defined')
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -17,7 +21,7 @@ export async function POST(req: NextRequest) {
         // Sort keys and join
         const sortedKeys = Object.keys(body).sort()
         const sortedParams = sortedKeys.map(key => `${key}=${body[key]}`).join('&')
-        const hmac = crypto.createHmac('sha512', IPN_SECRET)
+        const hmac = crypto.createHmac('sha512', IPN_SECRET as string)
         hmac.update(sortedParams)
         const calculatedSig = hmac.digest('hex')
 
