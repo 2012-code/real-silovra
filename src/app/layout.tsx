@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: 'Your Digital Identity, Simplified.',
   icons: {
     icon: '/silovra-logo.png',
+    shortcut: '/silovra-logo.png',
+    apple: '/silovra-logo.png',
   },
 }
 
