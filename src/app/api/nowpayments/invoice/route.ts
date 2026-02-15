@@ -19,11 +19,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
         }
 
-        if (!API_KEY) {
-            console.error('NOWPAYMENTS_API_KEY is missing')
-            return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
-        }
-
         const body = await req.json()
         const { email } = body
 
