@@ -22,7 +22,11 @@ async function getPayPalAccessToken(): Promise<string> {
         body: 'grant_type=client_credentials',
     })
 
-    if (!response.ok) throw new Error('Failed to get PayPal token')
+    if (!response.ok) {
+        const err = await response.text()
+        throw new Error(`Failed to get PayPal token: ${err}`)
+    }
+
     const data = await response.json()
     return data.access_token
 }
@@ -36,55 +40,44 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
         }
 
-        const body = await req.json()
-        const { orderID } = body
-
-        if (!orderID) {
-            return NextResponse.json({ error: 'Missing orderID' }, { status: 400 })
-        }
-
-        // 1. Server-side: get access token
         const accessToken = await getPayPalAccessToken()
 
-        // 2. Capture the order to confirm actual payment
-        const captureRes = await fetch(`${PAYPAL_BASE}/v2/checkout/orders/${orderID}/capture`, {
+        const response = await fetch(`${PAYPAL_BASE}/v2/checkout/orders`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+                intent: 'CAPTURE',
+                purchase_units: [{
+                    amount: {
+                        currency_code: 'USD',
+                        value: '9.00',
+                    },
+                    description: 'Silovra Pro – 1 Month',
+                    custom_id: user.id, // Link order to user
+                }],
+                application_context: {
+                    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?upgraded=true`,
+                    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+                    brand_name: 'Silovra',
+                    user_action: 'PAY_NOW',
+                },
+            }),
         })
 
-        if (!captureRes.ok) {
-            const err = await captureRes.json()
-            console.error('PayPal capture failed:', err)
-            return NextResponse.json({ error: 'Payment capture failed' }, { status: 400 })
+        if (!response.ok) {
+            const err = await response.json()
+            console.error('PayPal create order error:', err)
+            return NextResponse.json({ error: 'Failed to create PayPal order' }, { status: 500 })
         }
 
-        const captureData = await captureRes.json()
-
-        // 3. Verify payment was actually completed
-        const captureStatus = captureData?.purchase_units?.[0]?.payments?.captures?.[0]?.status
-        if (captureStatus !== 'COMPLETED') {
-            console.error('PayPal capture not COMPLETED:', captureStatus)
-            return NextResponse.json({ error: 'Payment not completed' }, { status: 400 })
-        }
-
-        // 4. Upgrade the user to Pro
-        const { error: updateError } = await supabase
-            .from('profiles')
-            .update({
-                plan: 'pro',
-                stripe_customer_id: `paypal_${orderID}`,
-            })
-            .eq('id', user.id)
-
-        if (updateError) throw updateError
-
-        return NextResponse.json({ success: true })
+        const order = await response.json()
+        return NextResponse.json({ id: order.id })
 
     } catch (err: any) {
-        console.error('PayPal capture error:', err)
+        console.error('PayPal create-order error:', err)
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }

@@ -3,13 +3,13 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Check, Zap, Crown, ArrowRight, Loader2, Sparkles } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { PLANS } from '@/lib/plans'
 import { createClient } from '@/utils/supabase/client'
-
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
 
 export default function PricingPage() {
     const [loading, setLoading] = useState(true)
+    const [cryptoLoading, setCryptoLoading] = useState(false)
     const [userId, setUserId] = useState<string | null>(null)
     const router = useRouter()
     const supabase = createClient()
@@ -17,15 +17,33 @@ export default function PricingPage() {
     useEffect(() => {
         const getUser = async () => {
             const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-                setUserId(user.id)
-            }
+            if (user) setUserId(user.id)
             setLoading(false)
         }
         getUser()
     }, [supabase])
 
-
+    const handleCryptoPay = async () => {
+        setCryptoLoading(true)
+        try {
+            const res = await fetch('/api/nowpayments/invoice', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: '' })
+            })
+            const data = await res.json()
+            if (data.invoice_url) {
+                window.location.href = data.invoice_url
+            } else {
+                alert('Payment Error: ' + (data.error || 'Unknown error'))
+            }
+        } catch (err) {
+            console.error(err)
+            alert('Something went wrong. Please try again.')
+        } finally {
+            setCryptoLoading(false)
+        }
+    }
 
     return (
         <>
@@ -127,40 +145,71 @@ export default function PricingPage() {
                                 ))}
                             </div>
 
-                            {/* Crypto Button */}
-                            <div className="z-10 relative">
+                            {/* Payment Buttons */}
+                            <div className="z-10 relative space-y-3">
                                 {loading ? (
                                     <div className="w-full py-4 bg-zenith-indigo/50 rounded-2xl flex items-center justify-center">
                                         <Loader2 size={16} className="animate-spin text-white" />
                                     </div>
                                 ) : (
-                                    <button
-                                        onClick={async () => {
-                                            setLoading(true)
-                                            try {
-                                                const res = await fetch('/api/nowpayments/invoice', {
-                                                    method: 'POST',
-                                                    headers: { 'Content-Type': 'application/json' },
-                                                    body: JSON.stringify({ email: '' })
-                                                })
-                                                const data = await res.json()
-                                                if (data.invoice_url) {
-                                                    window.location.href = data.invoice_url
-                                                } else {
-                                                    alert('Payment Error (V2): ' + (data.error || 'Unknown error'))
-                                                }
-                                            } catch (err) {
-                                                console.error(err)
-                                                alert('Connection error (V2)')
-                                            } finally {
-                                                setLoading(false)
-                                            }
-                                        }}
-                                        className="w-full py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/80 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 cursor-pointer text-center block"
-                                    >
-                                        Pay with Crypto
-                                        <ArrowRight size={14} />
-                                    </button>
+                                    <>
+                                        {/* PayPal Button */}
+                                        <PayPalScriptProvider options={{
+                                            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+                                            currency: 'USD',
+                                            intent: 'capture',
+                                        }}>
+                                            <PayPalButtons
+                                                style={{ layout: 'horizontal', color: 'gold', shape: 'rect', label: 'pay', height: 48 }}
+                                                createOrder={async () => {
+                                                    const res = await fetch('/api/paypal/create-order', { method: 'POST' })
+                                                    const data = await res.json()
+                                                    if (!data.id) throw new Error(data.error || 'Failed to create order')
+                                                    return data.id
+                                                }}
+                                                onApprove={async (data) => {
+                                                    const res = await fetch('/api/paypal/capture', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ orderID: data.orderID }),
+                                                    })
+                                                    const result = await res.json()
+                                                    if (result.success) {
+                                                        router.push('/dashboard?upgraded=true')
+                                                    } else {
+                                                        alert('Payment failed: ' + (result.error || 'Unknown error'))
+                                                    }
+                                                }}
+                                                onError={(err) => {
+                                                    console.error('PayPal error:', err)
+                                                    alert('PayPal encountered an error. Please try again.')
+                                                }}
+                                            />
+                                        </PayPalScriptProvider>
+
+                                        {/* Divider */}
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex-1 h-px bg-white/10" />
+                                            <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">or</span>
+                                            <div className="flex-1 h-px bg-white/10" />
+                                        </div>
+
+                                        {/* Crypto Button */}
+                                        <button
+                                            onClick={handleCryptoPay}
+                                            disabled={cryptoLoading}
+                                            className="w-full py-4 bg-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/80 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {cryptoLoading ? (
+                                                <Loader2 size={14} className="animate-spin" />
+                                            ) : (
+                                                <>
+                                                    Pay with Crypto
+                                                    <ArrowRight size={14} />
+                                                </>
+                                            )}
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </motion.div>
@@ -173,7 +222,7 @@ export default function PricingPage() {
                         transition={{ delay: 0.4 }}
                         className="text-center text-[10px] text-white/20 font-bold"
                     >
-                        Cancel anytime · Secure payments via NOWPayments · No long-term contracts
+                        Cancel anytime · Secure payments via PayPal & NOWPayments · No long-term contracts
                     </motion.p>
                 </div>
             </div>
