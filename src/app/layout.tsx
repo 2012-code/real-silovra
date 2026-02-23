@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+
 import './globals.css'
 import SupabaseProvider from '@/components/providers/supabase-provider'
 import BackgroundProvider from '@/components/providers/BackgroundProvider'
 import LayoutTransition from '@/components/LayoutTransition'
 import SonicAmbience from '@/components/SonicAmbience'
 
-const inter = Inter({ subsets: ['latin'] })
+
 
 export const metadata: Metadata = {
   title: 'Silovra',
@@ -33,7 +33,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#6366f1" />
       </head>
-      <body className={inter.className}>
+      <body>
         <SupabaseProvider>
           <BackgroundProvider>
             <LayoutTransition>

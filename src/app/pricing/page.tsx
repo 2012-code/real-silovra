@@ -5,19 +5,17 @@ import { motion } from 'framer-motion'
 import { Check, Zap, Crown, ArrowRight, Loader2, Sparkles } from 'lucide-react'
 import { PLANS } from '@/lib/plans'
 import { createClient } from '@/utils/supabase/client'
-import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
 
 export default function PricingPage() {
     const [loading, setLoading] = useState(true)
     const [cryptoLoading, setCryptoLoading] = useState(false)
-    const [userId, setUserId] = useState<string | null>(null)
+    const [paypalLoading, setPaypalLoading] = useState(false)
     const router = useRouter()
     const supabase = createClient()
 
     useEffect(() => {
         const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user) setUserId(user.id)
+            await supabase.auth.getUser()
             setLoading(false)
         }
         getUser()
@@ -45,6 +43,24 @@ export default function PricingPage() {
         }
     }
 
+    const handlePayPalPay = async () => {
+        setPaypalLoading(true)
+        try {
+            const res = await fetch('/api/paypal/create-order', { method: 'POST' })
+            const data = await res.json()
+            if (data.approveUrl) {
+                window.location.href = data.approveUrl
+            } else {
+                alert('PayPal Error: ' + (data.error || 'Unknown error'))
+            }
+        } catch (err) {
+            console.error(err)
+            alert('Something went wrong with PayPal. Please try again.')
+        } finally {
+            setPaypalLoading(false)
+        }
+    }
+
     return (
         <>
             <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-6 py-24">
@@ -59,7 +75,6 @@ export default function PricingPage() {
                             <Sparkles size={20} className="text-zenith-indigo" />
                             <span className="text-[10px] font-black text-zenith-indigo uppercase tracking-[0.5em]">Pricing</span>
                         </div>
-
                         <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter">
                             Choose Your Plan
                         </h1>
@@ -90,7 +105,6 @@ export default function PricingPage() {
                                 </div>
                                 <p className="text-[10px] text-white/30 font-bold">Perfect to get started</p>
                             </div>
-
                             <div className="space-y-3">
                                 {PLANS.free.features.map((feature, i) => (
                                     <div key={i} className="flex items-center gap-3">
@@ -99,7 +113,6 @@ export default function PricingPage() {
                                     </div>
                                 ))}
                             </div>
-
                             <button
                                 onClick={() => router.push('/dashboard')}
                                 className="w-full py-4 bg-white/[0.03] border border-white/10 rounded-2xl text-[10px] font-black text-white/50 uppercase tracking-widest hover:bg-white/[0.06] transition-all"
@@ -154,45 +167,21 @@ export default function PricingPage() {
                                 ) : (
                                     <>
                                         {/* PayPal Button */}
-                                        {process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ? (
-                                            <PayPalScriptProvider options={{
-                                                clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
-                                                currency: 'USD',
-                                                intent: 'capture',
-                                            }}>
-                                                <PayPalButtons
-                                                    forceReRender={[process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID]}
-                                                    style={{ layout: 'horizontal', color: 'gold', shape: 'rect', label: 'pay', height: 48 }}
-                                                    createOrder={async () => {
-                                                        const res = await fetch('/api/paypal/create-order', { method: 'POST' })
-                                                        const data = await res.json()
-                                                        if (!data.id) throw new Error(data.error || 'Failed to create order')
-                                                        return data.id
-                                                    }}
-                                                    onApprove={async (data) => {
-                                                        const res = await fetch('/api/paypal/capture', {
-                                                            method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify({ orderID: data.orderID }),
-                                                        })
-                                                        const result = await res.json()
-                                                        if (result.success) {
-                                                            router.push('/dashboard?upgraded=true')
-                                                        } else {
-                                                            alert('Payment failed: ' + (result.error || 'Unknown error'))
-                                                        }
-                                                    }}
-                                                    onError={(err) => {
-                                                        console.error('PayPal error:', err)
-                                                        alert('PayPal encountered an error. Please try again.')
-                                                    }}
-                                                />
-                                            </PayPalScriptProvider>
-                                        ) : (
-                                            <div className="w-full py-3 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl text-center text-[10px] text-yellow-400 font-bold">
-                                                PayPal not configured (missing env var)
-                                            </div>
-                                        )}
+                                        <button
+                                            onClick={handlePayPalPay}
+                                            disabled={paypalLoading}
+                                            className="w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                            style={{ backgroundColor: '#FFC439', color: '#003087' }}
+                                        >
+                                            {paypalLoading ? (
+                                                <Loader2 size={14} className="animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#003087"><path d="M20.067 8.478c.492.315.844.825.966 1.43.69-1.66.345-3.3-.982-4.347-1.45-1.14-3.6-1.06-5.65-1.06H8.914c-.478 0-.898.326-1.006.79L5.6 18.586h2.558l.637-4.054.02-.13c.108-.464.528-.79 1.006-.79h2.1c4.12 0 7.34-1.675 8.28-6.524.03-.163.055-.32.073-.474.108.58.096 1.1-.207 1.864z" /><path d="M9.337 8.084c.09-.463.51-.79.986-.79h6.47c.77 0 1.49.05 2.136.154a5.89 5.89 0 0 1 1.138.33 4.375 4.375 0 0 0-.966-1.43c-.94-.573-2.14-.65-3.87-.65H9.22c-.478 0-.898.326-1.006.79L5.6 18.586h2.97l.767-10.502z" fill="#009cde" /></svg>
+                                                    Pay with PayPal
+                                                </>
+                                            )}
+                                        </button>
 
                                         {/* Divider */}
                                         <div className="flex items-center gap-3">
