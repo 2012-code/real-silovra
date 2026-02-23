@@ -154,38 +154,45 @@ export default function PricingPage() {
                                 ) : (
                                     <>
                                         {/* PayPal Button */}
-                                        <PayPalScriptProvider options={{
-                                            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
-                                            currency: 'USD',
-                                            intent: 'capture',
-                                        }}>
-                                            <PayPalButtons
-                                                style={{ layout: 'horizontal', color: 'gold', shape: 'rect', label: 'pay', height: 48 }}
-                                                createOrder={async () => {
-                                                    const res = await fetch('/api/paypal/create-order', { method: 'POST' })
-                                                    const data = await res.json()
-                                                    if (!data.id) throw new Error(data.error || 'Failed to create order')
-                                                    return data.id
-                                                }}
-                                                onApprove={async (data) => {
-                                                    const res = await fetch('/api/paypal/capture', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({ orderID: data.orderID }),
-                                                    })
-                                                    const result = await res.json()
-                                                    if (result.success) {
-                                                        router.push('/dashboard?upgraded=true')
-                                                    } else {
-                                                        alert('Payment failed: ' + (result.error || 'Unknown error'))
-                                                    }
-                                                }}
-                                                onError={(err) => {
-                                                    console.error('PayPal error:', err)
-                                                    alert('PayPal encountered an error. Please try again.')
-                                                }}
-                                            />
-                                        </PayPalScriptProvider>
+                                        {process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ? (
+                                            <PayPalScriptProvider options={{
+                                                clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
+                                                currency: 'USD',
+                                                intent: 'capture',
+                                            }}>
+                                                <PayPalButtons
+                                                    forceReRender={[process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID]}
+                                                    style={{ layout: 'horizontal', color: 'gold', shape: 'rect', label: 'pay', height: 48 }}
+                                                    createOrder={async () => {
+                                                        const res = await fetch('/api/paypal/create-order', { method: 'POST' })
+                                                        const data = await res.json()
+                                                        if (!data.id) throw new Error(data.error || 'Failed to create order')
+                                                        return data.id
+                                                    }}
+                                                    onApprove={async (data) => {
+                                                        const res = await fetch('/api/paypal/capture', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ orderID: data.orderID }),
+                                                        })
+                                                        const result = await res.json()
+                                                        if (result.success) {
+                                                            router.push('/dashboard?upgraded=true')
+                                                        } else {
+                                                            alert('Payment failed: ' + (result.error || 'Unknown error'))
+                                                        }
+                                                    }}
+                                                    onError={(err) => {
+                                                        console.error('PayPal error:', err)
+                                                        alert('PayPal encountered an error. Please try again.')
+                                                    }}
+                                                />
+                                            </PayPalScriptProvider>
+                                        ) : (
+                                            <div className="w-full py-3 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl text-center text-[10px] text-yellow-400 font-bold">
+                                                PayPal not configured (missing env var)
+                                            </div>
+                                        )}
 
                                         {/* Divider */}
                                         <div className="flex items-center gap-3">
