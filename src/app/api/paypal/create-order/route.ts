@@ -22,7 +22,10 @@ async function getPayPalAccessToken(): Promise<string> {
         body: 'grant_type=client_credentials',
     })
 
-    if (!response.ok) throw new Error('Failed to get PayPal token')
+    if (!response.ok) {
+        const errText = await response.text()
+        throw new Error(`Failed to get PayPal token: ${errText}`)
+    }
     const data = await response.json()
     return data.access_token
 }
@@ -67,7 +70,7 @@ export async function POST(req: NextRequest) {
         if (!response.ok) {
             const err = await response.json()
             console.error('PayPal create order error:', err)
-            return NextResponse.json({ error: 'Failed to create PayPal order' }, { status: 500 })
+            return NextResponse.json({ error: 'Failed to create PayPal order', details: err }, { status: 500 })
         }
 
         const order = await response.json()
