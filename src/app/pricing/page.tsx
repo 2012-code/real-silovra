@@ -51,7 +51,8 @@ export default function PricingPage() {
             if (data.approveUrl) {
                 window.location.href = data.approveUrl
             } else {
-                alert('PayPal Error: ' + (data.error || 'Unknown error'))
+                const detail = data.details ? '\n\nDetails: ' + JSON.stringify(data.details, null, 2) : ''
+                alert('PayPal Error: ' + (data.error || 'Unknown error') + detail)
             }
         } catch (err) {
             console.error(err)
